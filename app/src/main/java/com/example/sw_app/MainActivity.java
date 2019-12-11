@@ -9,24 +9,19 @@ import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.ParcelUuid;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ListView;
 import android.widget.SeekBar;
-import android.widget.Toast;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-//    Button b1,b2,b3,b4;
 //    private BluetoothAdapter BA;
 //    private Set<BluetoothDevice> pairedDevices;
 //    ListView lv;
@@ -39,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
     private SeekBar seekBarR;
     private SeekBar seekBarG;
     private SeekBar seekBarB;
+    private List<View> ledButtons;
     private ConnectThread c;
     BluetoothHeadset bluetoothHeadset;
 
@@ -62,6 +58,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        ledButtons = new ArrayList<View>();
+        ledButtons.add(findViewById(R.id.button1));
+        ledButtons.add(findViewById(R.id.button2));
+        ledButtons.add(findViewById(R.id.button3));
+        ledButtons.add(findViewById(R.id.button4));
+
         seekBarR = findViewById(R.id.seekBarR);
         seekBarG = findViewById(R.id.seekBarG);
         seekBarB = findViewById(R.id.seekBarB);
@@ -178,11 +181,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setBulb(View view) {
-        System.out.println(((Button)view).getText());
+        //set last active button to non active now
+        ledButtons.get(buttonManager.getActiveButton().getButtonNumber()).setActivated(false);
+
         buttonManager.setActiveButtonByNumber(Integer.valueOf(((Button)view).getText().toString()));
         seekBarR.setProgress(buttonManager.getActiveButton().getR());
         seekBarG.setProgress(buttonManager.getActiveButton().getG());
         seekBarB.setProgress(buttonManager.getActiveButton().getB());
+        ledButtons.get(buttonManager.getActiveButton().getButtonNumber()).setActivated(true);
     }
 
     public void exit(View view) {
