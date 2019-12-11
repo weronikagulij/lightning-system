@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">sw_app</string>
+    <string name="button1">1</string>
+    <string name="button2">2</string>
+    <string name="button3">3</string>
+    <string name="button4">4</string>
+    <string name="exit">EXIT</string>
+</resources>
