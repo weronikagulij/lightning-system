@@ -1,5 +1,5 @@
 package com.example.sw_app;
-//
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.bluetooth.BluetoothAdapter;
@@ -22,11 +22,6 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
-//    private BluetoothAdapter BA;
-//    private Set<BluetoothDevice> pairedDevices;
-//    ListView lv;
-//    private OutputStream outputStream;
-//    private BluetoothSocket socket = null;
     private String TAG = "mymsg";
     private UUID MY_UUID = UUID.fromString("94f39d29-7d6d-437d-973b-fba39e49d4ee");
     private final static int REQUEST_ENABLE_BT = 1;
@@ -68,11 +63,11 @@ public class MainActivity extends AppCompatActivity {
         seekBarR = findViewById(R.id.seekBarR);
         seekBarG = findViewById(R.id.seekBarG);
         seekBarB = findViewById(R.id.seekBarB);
-//        bluetoothAdapter.getProfileProxy(context, profileListener, BluetoothProfile.HEADSET);
-//        //
-//        bluetoothAdapter.closeProfileProxy(bluetoothHeadset);
+
+        seekBarR.setProgress(1);
+        seekBarB.setProgress(1);
+        seekBarG.setProgress(1);
         buttonManager = new ButtonManager();
-//        ButtonState first = new ButtonState();
 
         buttonManager.addButton(new ButtonState(1));
         buttonManager.addButton(new ButtonState(2));
@@ -80,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
         buttonManager.addButton(new ButtonState(4));
 
         buttonManager.setActiveButton(buttonManager.getButtonByNumber(0));
+
+        ledButtons.get(0).setActivated(true);
 
         seekBarR.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -153,42 +150,30 @@ public class MainActivity extends AppCompatActivity {
             Log.d("mymsg", "was not enabled");
         }
 
-//        Intent discoverableIntent =
-//                new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300);
-//        startActivity(discoverableIntent);
-
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
         if (pairedDevices.size() > 0) {
-            // There are paired devices. Get the name and address of each paired device.
             for (BluetoothDevice device : pairedDevices) {
                 String deviceName = device.getName();
-                String deviceHardwareAddress = device.getAddress(); // MAC address
                 Log.d("mymsg", deviceName);
                 if(deviceName.equals("raspberrypi")) {
                     c = new ConnectThread(device);
                     c.run();
                     break;
                 }
-//                Log.d(TAG, c.toString());
-//                c.writeMsg("message");
-
-
             }
         }
 
     }
 
     public void setBulb(View view) {
-        //set last active button to non active now
-        ledButtons.get(buttonManager.getActiveButton().getButtonNumber()).setActivated(false);
+        ledButtons.get(buttonManager.getActiveButton().getButtonNumber() - 1).setActivated(false);
 
-        buttonManager.setActiveButtonByNumber(Integer.valueOf(((Button)view).getText().toString()));
+        buttonManager.setActiveButtonByNumber(Integer.valueOf(((Button)view).getText().toString()) - 1);
         seekBarR.setProgress(buttonManager.getActiveButton().getR());
         seekBarG.setProgress(buttonManager.getActiveButton().getG());
         seekBarB.setProgress(buttonManager.getActiveButton().getB());
-        ledButtons.get(buttonManager.getActiveButton().getButtonNumber()).setActivated(true);
+        ledButtons.get(buttonManager.getActiveButton().getButtonNumber() - 1).setActivated(true);
     }
 
     public void exit(View view) {
@@ -204,16 +189,10 @@ public class MainActivity extends AppCompatActivity {
         public boolean isAvailable = false;
 
         public ConnectThread(BluetoothDevice device) {
-            // Use a temporary object that is later assigned to mmSocket
-            // because mmSocket is final.
             BluetoothSocket tmp = null;
-
             mmDevice = device;
 
             try {
-                // Get a BluetoothSocket to connect with the given BluetoothDevice.
-                // MY_UUID is the app's UUID string, also used in the server code.
-//                tmpIn = socket.getInputStream();
                 tmp = device.createRfcommSocketToServiceRecord(MY_UUID);
             } catch (IOException e) {
                 Log.e(TAG, "Socket's create() method failed", e);
@@ -222,21 +201,16 @@ public class MainActivity extends AppCompatActivity {
         }
 
         public void run() {
-            // Cancel discovery because it otherwise slows down the connection.
             bluetoothAdapter.cancelDiscovery();
             Log.d(TAG, "able to run");
             try {
-                // Connect to the remote device through the socket. This call blocks
-                // until it succeeds or throws an exception.
                 mmSocket.connect();
                 outputStream = mmSocket.getOutputStream();
                 isAvailable = true;
-//                writeMsg("message");
                 Log.d(TAG, "able to connect!");
 
             } catch (IOException connectException) {
                 Log.d(TAG, "unable to connect, " + connectException.getMessage());
-                // Unable to connect; close the socket and return.
                 try {
                     mmSocket.close();
                 } catch (IOException closeException) {
@@ -244,16 +218,10 @@ public class MainActivity extends AppCompatActivity {
                 }
                 return;
             }
-
-            // The connection attempt succeeded. Perform work associated with
-            // the connection in a separate thread.
-//            manageMyConnectedSocket(mmSocket);
-
         }
 
         public void writeMsg(String msg) {
             try {
-
                 if(c.isAvailable) {
                     Log.d(TAG, msg);
                     outputStream.write(msg.getBytes());
@@ -272,88 +240,4 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//
-//        b1 = (Button) findViewById(R.id.button);
-//        b2=(Button)findViewById(R.id.button2);
-//        b3=(Button)findViewById(R.id.button3);
-//        b4=(Button)findViewById(R.id.button4);
-//
-//        BA = BluetoothAdapter.getDefaultAdapter();
-//        lv = (ListView)findViewById(R.id.listView);
-//
-//    }
-//
-//    public void on(View v){
-//        if (!BA.isEnabled()) {
-//            Intent turnOn = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//            startActivityForResult(turnOn, 0);
-//            Toast.makeText(getApplicationContext(), "Turned on",Toast.LENGTH_LONG).show();
-//        } else {
-//            Toast.makeText(getApplicationContext(), "Already on", Toast.LENGTH_LONG).show();
-//        }
-//    }
-//
-//    public void off(View v){
-//        BA.disable();
-//        Toast.makeText(getApplicationContext(), "Turned off" ,Toast.LENGTH_LONG).show();
-//    }
-//
-//
-//    public  void visible(View v){
-//        Intent getVisible = new Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-//        startActivityForResult(getVisible, 0);
-//    }
-//
-//
-//    public void list(View v) throws IOException {
-//        pairedDevices = BA.getBondedDevices();
-//
-//        ArrayList list = new ArrayList();
-//
-//        for(BluetoothDevice bt : pairedDevices) {
-////            list.add(bt.getName());
-////            ParcelUuid[] uuids = bt.getUuids();
-////            BluetoothSocket socket = bt.createRfcommSocketToServiceRecord(uuids[0].getUuid());
-////            socket.connect();
-////            outputStream = socket.getOutputStream();
-////            Log.d("mymsg", outputStream.toString());
-////            Log.d("mymsg", bt.getName());
-//            Log.d("mymsg", bt.getAddress());
-//                try {
-//                    ParcelUuid[] uuids = bt.getUuids();
-//                    socket = bt.createInsecureRfcommSocketToServiceRecord(uuids[0].getUuid());
-//
-//                    Log.d("mymsg", "udalo sie pobrac uuid " + uuids[0].getUuid());
-//
-//                } catch (IOException e0) {
-//                    Log.d("BT_TEST", "Cannot create socket");
-//                    e0.printStackTrace();
-//                }
-//
-//                try {
-//                    socket.connect();
-//                    Log.d("mymsg", "udalo sie podlaczyc");
-//                } catch (IOException e1) {
-//                    Log.d("mymsg", " nie udalo sie podlaczyc " + e1.getMessage());
-//                    try {
-//                        socket.close();
-//                        Log.d("BT_TEST", "Cannot connect");
-//                        e1.printStackTrace();
-//                    } catch (IOException e2) {
-//                        Log.d("BT_TEST", "Socket not closed");
-//                        e2.printStackTrace();
-//                    }
-//                }
-//        }
-//        Toast.makeText(getApplicationContext(), "Showing Paired Devices",Toast.LENGTH_SHORT).show();
-//
-//        final ArrayAdapter adapter = new  ArrayAdapter(this,android.R.layout.simple_list_item_1, list);
-//
-//        lv.setAdapter(adapter);
-//    }
 }
